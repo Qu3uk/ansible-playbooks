@@ -1,0 +1,116 @@
+---
+- hosts: idrac_dell_redfish
+  connection: local
+  name: Config Redfish Dell Instances
+  gather_facts: False
+
+  vars_prompt:
+    - name: redfish_user
+      prompt: "What is the redfish username?"
+      private: no
+    
+    - name: redfish_pass
+      prompt: "What is the redfish password?"
+
+  vars:
+    - ntpserver1: 0.uk.pool.ntp.org
+    - dns1: 1.1.1.1
+    - dns2: 8.8.8.8
+    - dnsdomain: example.local
+
+  tasks:
+    - name: Enable NTP
+      idrac_redfish_config:
+        category: Manager
+        command: SetManagerAttributes
+        manager_attribute_name: NTPConfigGroup.1.NTPEnable
+        manager_attribute_value: Enabled
+        baseuri: "{{ inventory_hostname }}"
+        username: "{{ redfish_user }}"
+        password: "{{ redfish_pass }}"
+        timeout: 15
+
+    - name: Disable SNMP
+      idrac_redfish_config:
+        category: Manager
+        command: SetManagerAttributes
+        manager_attribute_name: SNMP.1.AgentEnable 
+        manager_attribute_value: "Disabled"
+        baseuri: "{{ inventory_hostname }}"
+        username: "{{ redfish_user }}"
+        password: "{{ redfish_pass }}"
+        timeout: 15
+
+    - name: Disable Virtual Media
+      idrac_redfish_config:
+        category: Manager
+        command: SetManagerAttributes
+        manager_attribute_name: VirtualMedia.1.Enable
+        manager_attribute_value: "Disabled"
+        baseuri: "{{ inventory_hostname }}"
+        username: "{{ redfish_user }}"
+        password: "{{ redfish_pass }}"
+        timeout: 15
+        
+    - name: Disable IPMI
+      idrac_redfish_config:
+        category: Manager
+        command: SetManagerAttributes
+        manager_attribute_name: IPMILan.1.Enable
+        manager_attribute_value: "Disabled"
+        baseuri: "{{ inventory_hostname }}"
+        username: "{{ redfish_user }}"
+        password: "{{ redfish_pass }}"
+        timeout: 15
+        
+    - name: Set DNS name
+      idrac_redfish_config:
+        category: Manager
+        command: SetManagerAttributes
+        manager_attribute_name: NIC.1.DNSRacName
+        manager_attribute_value: "{{ dns_hostname }}"
+        baseuri: "{{ inventory_hostname }}"
+        username: "{{ redfish_user }}"
+        password: "{{ redfish_pass }}"
+        timeout: 15
+
+    - name: Set NTP server 1 to {{ ntpserver1 }}
+      idrac_redfish_config:
+        category: Manager
+        command: SetManagerAttributes
+        manager_attribute_name: NTPConfigGroup.1.NTP1
+        manager_attribute_value: "{{ ntpserver1 }}"
+        baseuri: "{{ inventory_hostname }}"
+        username: "{{ redfish_user }}"
+        password: "{{ redfish_pass }}"
+        timeout: 15
+
+    - name: Configure Static DNS Settings Server 1
+      idrac_redfish_config:
+        category: Manager
+        command: SetManagerAttributes
+        manager_attribute_name: IPv4Static.1.DNS1
+        manager_attribute_value: "{{ dns1 }}"
+        baseuri: "{{ inventory_hostname }}"
+        username: "{{ redfish_user }}"
+        password: "{{ redfish_pass }}"
+
+    - name: Configure Static DNS Settings Server 2
+      idrac_redfish_config:
+        category: Manager
+        command: SetManagerAttributes
+        manager_attribute_name: IPv4Static.1.DNS2
+        manager_attribute_value: "{{ dns2 }}"
+        baseuri: "{{ inventory_hostname }}"
+        username: "{{ redfish_user }}"
+        password: "{{ redfish_pass }}"
+
+    - name: Configure Domain Name
+      idrac_redfish_config:
+        category: Manager
+        command: SetManagerAttributes
+        manager_attribute_name: NICStatic.1.DNSDomainName
+        manager_attribute_value: "{{ dnsdomain }}"
+        baseuri: "{{ inventory_hostname }}"
+        username: "{{ redfish_user }}"
+        password: "{{ redfish_pass }}"
